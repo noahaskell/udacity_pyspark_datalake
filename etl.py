@@ -12,20 +12,28 @@ config.read('dl.cfg')
 
 os.environ['AWS_ACCESS_KEY_ID'] = config['AWS']['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS']['AWS_SECRET_ACCESS_KEY']
+os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3'
+os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3'
 
 
 def create_spark_session():
     spark = SparkSession \
         .builder \
-        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
+        .config("parquet.enable.summary-metadata", "false") \
+        .config("fs.s3.awsAccessKeyId", os.environ['AWS_ACCESS_KEY_ID']) \
+        .config("fs.s3.awsSecretAccessKey", os.environ['AWS_SECRET_ACCESS_KEY']) \
+        .config("fs.s3.impl", "org.apache.hadoop.fs.s3native.NativeS3FileSystem") \
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.3") \
+        .config("spark.sql.parquet.fs.optimized.committer.optimization-enabled", "true") \
         .getOrCreate()
+        # .config("mapreduce.fileoutputcommitter.algorithm.version", "2")
     return spark
 
 
 def process_song_data(spark, input_data, output_data):
     """INSERT DOCSTRING HERE"""
     # get filepath to song data file
-    song_data = input_data + 'song_data/*/*/*'
+    song_data = input_data + 'song_data/*/*/*/*.json'
 
     # read song data file
     df = spark.read.json(song_data)
@@ -58,7 +66,7 @@ def process_song_data(spark, input_data, output_data):
 def process_log_data(spark, input_data, output_data):
 
     # get filepath to log data file
-    log_data = input_data + 'log_data/*/*/*'
+    log_data = input_data + 'log_data/*/*/*.json'
 
     # read log data file
     # drop schema
@@ -134,7 +142,7 @@ def process_log_data(spark, input_data, output_data):
 def main():
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
-    output_data = "s3a://udacity-sparkify-datalake/"
+    output_data = "s3://udacity-sparkify-datalake/"
 
     process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)
