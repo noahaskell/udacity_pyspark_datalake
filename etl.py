@@ -72,7 +72,7 @@ def process_song_data(spark, input_data, output_data):
                       col('artist_location').alias('location'),
                       col('artist_latitude').alias('latitude'),
                       col('artist_longitude').alias('longitude')]
-    artists_table = df.selectExpr(*artists_fields) \
+    artists_table = df.select(*artists_fields) \
         .filter(col("artist_id").isNotNull()) \
         .filter(col("artist_name").isNotNull()) \
         .dropDuplicates()
