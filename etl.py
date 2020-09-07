@@ -20,6 +20,7 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = '/usr/bin/python3'
 
 
 def create_spark_session():
+    """Creates and returns SparkSession instance"""
     spark = SparkSession \
         .builder \
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.3") \
@@ -28,7 +29,18 @@ def create_spark_session():
 
 
 def process_song_data(spark, input_data, output_data):
-    """INSERT DOCSTRING HERE"""
+    """Reads in song data, selects columns for songs_table
+       and artists_table, writes songs_table and artists_table
+       to S3 in parquet format.
+
+       Parameters
+       ----------
+       spark: SparkSession instance
+       input_data: str
+           root location of input data in S3
+       output_data: str
+           root location of output data in S3
+    """
     # get filepath to song data file
     song_data = input_data + 'song_data/*/*/*/*.json'
     # song_data = input_data + 'song_data/A/B/C/*.json'
@@ -85,6 +97,18 @@ def process_song_data(spark, input_data, output_data):
 
 
 def process_log_data(spark, input_data, output_data):
+    """Reads in log data and songs_table, creates users_table,
+       time_table, and songplays_table. Writes all three to S3
+       in parquet format.
+
+       Parameters
+       ----------
+       spark: SparkSession instance
+       input_data: str
+           root location of input data in S3
+       output_data: str
+           root location of output data in S3
+    """
 
     # get filepath to log data file
     log_data = input_data + 'log_data/*/*/*.json'
@@ -196,6 +220,10 @@ def process_log_data(spark, input_data, output_data):
 
 
 def main():
+    """Creates SparkSessionInstance, defines input_data
+       and output_data, calls process_song_data() and
+       process_log_data().
+    """
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
     output_data = "s3://udacity-sparkify-datalake/"
